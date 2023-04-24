@@ -1,0 +1,41 @@
+### Data for simple_XRD.jl
+
+θ_min   0
+θ_max   180
+N   1000
+
+λ   0.15418
+# CuKα radiation in nm
+
+U   0.2
+V   0.2
+W   0.2
+
+
+### Lattice parameter for some elements (in Å)
+### from https://en.wikipedia.org/wiki/Lattice_constant
+### SC Polonium (α-Po) from https://en.wikipedia.org/wiki/Polonium
+### BCC Tantalum (α-Ta) from https://en.wikipedia.org/wiki/Tantalum
+### FCC Platinum from https://periodictable.com/Elements/078/data.html
+
+
+### SC lattice:
+SC  Po  0.3352
+
+### BCC lattice:
+#BCC Fe  0.2856
+BCC Mo  0.3142
+#BCC W   0.3155
+#BCC V   0.30399
+#BCC Nb  0.33008
+#BCC Ta  0.33058
+
+### FCC lattice:
+#FCC Al  0.4046
+FCC Ni  0.3499
+#FCC Cu  0.3594
+#FCC Pd  0.3859
+#FCC Ag  0.4079
+#FCC Pt  0.4920
+#FCC Au  0.4065
+#FCC Pb  0.4920
