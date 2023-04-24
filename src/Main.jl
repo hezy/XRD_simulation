@@ -20,4 +20,4 @@ function main(data_file_name)
 end
 
 
-main("simple_XRD.txt")
+main("./data/XRD_data.txt")
