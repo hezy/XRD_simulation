@@ -4,9 +4,10 @@ using CSV
 
 include("XRD_Module.jl")
 
+
 using .XRD_Module: do_it_zero, do_it
 
-function main(data_file_name)
+function main(data_file_name::String, output_file_name::String)
     Random.seed!(347) # Setting the seed for random noise
 
     θ₀ = do_it_zero(data_file_name)
@@ -16,8 +17,8 @@ function main(data_file_name)
         df[:, "θ"], df[:, lattice_type] = do_it(data_file_name, lattice_type)
     end
     
-    CSV.write("./output/XRD_results.csv", df)
+    CSV.write(output_file_name, df)
 end
 
 
-main("./data/XRD_data.txt")
+main("./data/XRD_data.txt", "./output/XRD_results.csv")
