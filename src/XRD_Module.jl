@@ -1,18 +1,17 @@
 module XRD_Module
 
-export do_it_zero
-export do_it
+export main
 
 using Plots
 using SpecialFunctions
 using Random
 using Distributions
-#using DataFrames
-#using CSV
+using DataFrames
+using CSV
 
 
-function Voigt_peak(θ::Vector, θ₀, A, w_L, w_G, n)
-    """Returns a Voigt peak centered around θ₀, with amplitude A, width w, and mixing factor n """
+function Voigt_peak(θ::Vector, θ₀, A, w_L, w_G)
+    """Returns a Voigt peak centered around θ₀, with amplitude A, and width w """
     """untested"""
     γ = w_L / 2
     σ = w_G / (2√(2log(2)))
@@ -185,6 +184,20 @@ function do_it(file_name, lattice_type)
     savefig(p, joinpath("output", the_title))
 
     return θ, y
+end
+
+
+function main(data_file_name::String, output_file_name::String)
+    Random.seed!(347) # Setting the seed for random noise
+
+    θ₀ = do_it_zero(data_file_name)
+    df = DataFrame(θ=θ₀, SC=θ₀, BCC=θ₀, FCC=θ₀)
+    
+    for lattice_type in ("SC", "BCC", "FCC")
+        df[:, "θ"], df[:, lattice_type] = do_it(data_file_name, lattice_type)
+    end
+    
+    CSV.write(output_file_name, df)
 end
 
 
