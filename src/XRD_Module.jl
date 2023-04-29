@@ -3,24 +3,24 @@ module XRD_Module
 export main
 
 using Plots
-using SpecialFunctions
+#using SpecialFunctions
 using Random
 using Distributions
 using DataFrames
 using CSV
 
 
-function Voigt_peak(θ::Vector, θ₀, A, w_L, w_G)
-    """Returns a Voigt peak centered around θ₀, with amplitude A, and width w """
-    """untested"""
-    γ = w_L / 2
-    σ = w_G / (2√(2log(2)))
-    z = @. -im * ((θ - θ₀) + im * γ) / (√2 * σ)
-    return @. real(erfcx(z)) / (√(2pi) * σ)
-end
+#function Voigt_peak(θ, θ₀, A, w_L, w_G)
+#    """Returns a Voigt peak centered around θ₀, with amplitude A, and width w """
+#    """untested"""
+#    γ = w_L / 2
+#    σ = w_G / (2√(2log(2)))
+#    z = @. -im * ((θ - θ₀) + im * γ) / (√2 * σ)
+#    return @. A * real(erfcx(z)) / (√(2pi) * σ)
+#end
 
 
-function pseudo_Voigt_peak(θ::Vector, θ₀, A, w, n)
+function pseudo_Voigt_peak(θ, θ₀, A, w, n)
     """Returns a pseudo Voigt peak centered around θ₀, with amplitude A, width w, and mixing factor n """
     γ = w / 2
     σ = w / (2√(2log(2)))
@@ -47,15 +47,16 @@ end
 
 function d_list(indices, a)
     """Returnes the inter-layers distances as a function of Miller_indices """
+    print(typeof(indices))
     return a ./ .√(sum(indices .^ 2, dims = 2))
 end
 
 
-function sum_peaks(θ::Vector, two_θ_list, U, V, W)
+function sum_peaks(θ, two_θ_list, U, V, W)
     """Sums peak functions to return intensity vs angle """
     y = zeros(size(θ))
     for item in two_θ_list
-        y = y + pseudo_Voigt_peak(θ, item, 1, peaks_width(θ, U, V, W), 0.5)
+        y = y + pseudo_Voigt_peak(θ, item, 1.0, peaks_width(θ, U, V, W), 0.5)
     end
     return y
 end
@@ -70,7 +71,7 @@ function intensity_vs_angle(θ, indices, λ, a, U, V, W)
 end
 
 
-function Miller_indices(cell_type::String, min::Int64, max::Int64)
+function Miller_indices(cell_type, min, max)
     """Returns a list of Miller indices for each one of the cubic symmetries"""
     if !(cell_type in ["SC", "BCC", "FCC"])
         error("Invalid cell_type: $cell_type. Expected 'SC', 'BCC', or 'FCC'.")
@@ -105,13 +106,13 @@ function Miller_indices(cell_type::String, min::Int64, max::Int64)
 end
 
 
-function background(θ::Vector)
+function background(θ)
     """background function for the XRD pattern """
     return @. 2 + θ * (360 - θ) / 15000
 end
 
 
-function make_noisy(θ::Vector, y::Vector)
+function make_noisy(θ, y)
     """Adding some noise to the data """
     return (background(θ) + y) .* rand(Normal(1, 0.1), size(θ))
 end
@@ -167,7 +168,7 @@ function do_it(file_name, lattice_type)
     θ = collect(LinRange(instrument_data["θ_min"], instrument_data["θ_max"], instrument_data["N"]))
     y = zeros(instrument_data["N"])
     λ = instrument_data["λ"]
-    U, V, W = instrument_data["U"], instrument_data["V"], instrument_data["W"] 
+    U, V, W = instrument_data["U"], instrument_data["V"], instrument_data["W"]
     
     a = lattice_params[lattice_type]
 
@@ -187,7 +188,7 @@ function do_it(file_name, lattice_type)
 end
 
 
-function main(data_file_name::String, output_file_name::String)
+function main(data_file_name, output_file_name)
     Random.seed!(347) # Setting the seed for random noise
 
     θ₀ = do_it_zero(data_file_name)
