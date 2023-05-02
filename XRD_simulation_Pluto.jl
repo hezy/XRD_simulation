@@ -13,6 +13,9 @@ begin
 	using CSV
 end
 
+# ╔═╡ 00944f98-229e-4bf3-a0af-f82b1ce48ef8
+# Functions
+
 # ╔═╡ 2d4bd42f-4e68-418c-b1fd-4ed121e064c9
 function pseudo_Voigt_peak(θ::Vector{Float64}, θ₀::Float64, A::Float64, w::Vector{Float64}, n::Float64)
     """Returns a pseudo Voigt peak centered around θ₀, with amplitude A, width w, and mixing factor n """
@@ -168,24 +171,15 @@ function do_it(file_name::String, lattice_type::String)
 
     indices = Miller_indices(lattice_type, -5, 5)
 
-    #println(indices)
-    #println(typeof(indices))
-
     y = (background(θ) + 
         intensity_vs_angle(θ, indices, λ, a, U, V, W)) .*
         rand(Normal(1, 0.1), N)
-
-    the_title = "XRD - " * lattice_type
-
-    p = plot(θ, y, title=the_title, xlabel="2θ (deg)", ylabel="Intensity (arb.)")
-    display(p)
-    savefig(p, joinpath("output", the_title))
 
     return θ, y
 end
 
 # ╔═╡ 15a623a0-e974-43bf-a85d-1edee0730c88
-function main(data_file_name::String, output_file_name::String)
+function build_frame(data_file_name::String)
     Random.seed!(347) # Setting the seed for random noise
 
     θ₀::Vector{Float64} = do_it_zero(data_file_name)
@@ -194,12 +188,35 @@ function main(data_file_name::String, output_file_name::String)
     for lattice_type in ("SC", "BCC", "FCC")
         df[:, "θ"], df[:, lattice_type] = do_it(data_file_name, lattice_type)
     end
-    
-    CSV.write(output_file_name, df)
+
+	return df
 end
 
-# ╔═╡ 2ecdc7c9-c2e9-4e78-9011-d9a6792bb1cb
-main("./data/XRD_data.txt", "./output/XRD_results.csv")
+# ╔═╡ b112de4a-605e-47c4-ad27-94397a8dc6bc
+function plot_XRD(XRD_frame, lattice_type)
+	plotly()
+    plot(XRD_frame[:, "θ"], XRD_frame[:, lattice_type],
+	title=("XRD - " * lattice_type),
+	xlabel="2θ (deg)", ylabel="Intensity (arb.)")
+end
+
+# ╔═╡ d904be72-552a-4d0a-8662-ef79dd8439b7
+# Main
+
+# ╔═╡ 6360b359-c6ac-443f-8a6f-9ba975e27714
+XRD_frame = build_frame("./data/XRD_data.txt")
+
+# ╔═╡ 01fd7809-0b92-4f9b-adac-90b88fe9213e
+CSV.write("./output/XRD_results.csv", XRD_frame)
+
+# ╔═╡ 97cb9c6b-842a-4ec2-a93b-603d6a14cf7d
+p1 = plot_XRD(XRD_frame, "SC")
+
+# ╔═╡ 58d62585-d13a-4a3f-bbc0-8b5c65550860
+p2 = plot_XRD(XRD_frame, "BCC")
+
+# ╔═╡ 21e36a09-4a5d-4c53-960c-4f26e0024e08
+p3 = plot_XRD(XRD_frame, "FCC")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1316,6 +1333,7 @@ version = "1.4.1+0"
 
 # ╔═╡ Cell order:
 # ╠═512a1f38-e918-11ed-1743-1bcb626370a7
+# ╠═00944f98-229e-4bf3-a0af-f82b1ce48ef8
 # ╠═2d4bd42f-4e68-418c-b1fd-4ed121e064c9
 # ╠═fc6c0ca7-5b19-4552-a7fe-d34ba52bd3bb
 # ╠═526d1dc8-183a-4db2-9faf-a4cf70997dc1
@@ -1329,6 +1347,12 @@ version = "1.4.1+0"
 # ╠═fa6e6d82-c036-43c1-af5e-a2b38b1cabf8
 # ╠═72765728-178a-46d3-9c52-a13b1e4bac07
 # ╠═15a623a0-e974-43bf-a85d-1edee0730c88
-# ╠═2ecdc7c9-c2e9-4e78-9011-d9a6792bb1cb
+# ╠═b112de4a-605e-47c4-ad27-94397a8dc6bc
+# ╠═d904be72-552a-4d0a-8662-ef79dd8439b7
+# ╠═6360b359-c6ac-443f-8a6f-9ba975e27714
+# ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
+# ╠═97cb9c6b-842a-4ec2-a93b-603d6a14cf7d
+# ╠═58d62585-d13a-4a3f-bbc0-8b5c65550860
+# ╠═21e36a09-4a5d-4c53-960c-4f26e0024e08
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
