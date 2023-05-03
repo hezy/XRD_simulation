@@ -192,6 +192,16 @@ function build_frame(data_file_name::String)
 	return df
 end
 
+# ╔═╡ 6360b359-c6ac-443f-8a6f-9ba975e27714
+function save_frame(data_file_name::String, output_file_name::String)
+	XRD_frame = build_frame(data_file_name)
+	CSV.write(output_file_name, XRD_frame)
+	return XRD_frame
+end
+
+# ╔═╡ 01fd7809-0b92-4f9b-adac-90b88fe9213e
+global XRD_frame::DataFrame = save_frame("./data/XRD_data.txt", "./output/XRD_results.csv")
+
 # ╔═╡ b112de4a-605e-47c4-ad27-94397a8dc6bc
 function plot_XRD(XRD_frame, lattice_type)
 	plotly()
@@ -199,15 +209,6 @@ function plot_XRD(XRD_frame, lattice_type)
 	title=("XRD - " * lattice_type),
 	xlabel="2θ (deg)", ylabel="Intensity (arb.)")
 end
-
-# ╔═╡ d904be72-552a-4d0a-8662-ef79dd8439b7
-# Main
-
-# ╔═╡ 6360b359-c6ac-443f-8a6f-9ba975e27714
-XRD_frame = build_frame("./data/XRD_data.txt")
-
-# ╔═╡ 01fd7809-0b92-4f9b-adac-90b88fe9213e
-CSV.write("./output/XRD_results.csv", XRD_frame)
 
 # ╔═╡ 97cb9c6b-842a-4ec2-a93b-603d6a14cf7d
 p1 = plot_XRD(XRD_frame, "SC")
@@ -1347,10 +1348,9 @@ version = "1.4.1+0"
 # ╠═fa6e6d82-c036-43c1-af5e-a2b38b1cabf8
 # ╠═72765728-178a-46d3-9c52-a13b1e4bac07
 # ╠═15a623a0-e974-43bf-a85d-1edee0730c88
-# ╠═b112de4a-605e-47c4-ad27-94397a8dc6bc
-# ╠═d904be72-552a-4d0a-8662-ef79dd8439b7
 # ╠═6360b359-c6ac-443f-8a6f-9ba975e27714
 # ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
+# ╠═b112de4a-605e-47c4-ad27-94397a8dc6bc
 # ╠═97cb9c6b-842a-4ec2-a93b-603d6a14cf7d
 # ╠═58d62585-d13a-4a3f-bbc0-8b5c65550860
 # ╠═21e36a09-4a5d-4c53-960c-4f26e0024e08
