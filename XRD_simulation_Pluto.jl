@@ -210,6 +210,9 @@ function plot_XRD(XRD_frame, lattice_type)
 	xlabel="2θ (deg)", ylabel="Intensity (arb.)")
 end
 
+# ╔═╡ d70eaec1-f992-469f-a592-08a08a881f32
+map((x -> plot_XRD(XRD_frame, x)), ["SC", "BCC", "FCC"])
+
 # ╔═╡ 97cb9c6b-842a-4ec2-a93b-603d6a14cf7d
 p1 = plot_XRD(XRD_frame, "SC")
 
@@ -1351,6 +1354,7 @@ version = "1.4.1+0"
 # ╠═6360b359-c6ac-443f-8a6f-9ba975e27714
 # ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
 # ╠═b112de4a-605e-47c4-ad27-94397a8dc6bc
+# ╠═d70eaec1-f992-469f-a592-08a08a881f32
 # ╠═97cb9c6b-842a-4ec2-a93b-603d6a14cf7d
 # ╠═58d62585-d13a-4a3f-bbc0-8b5c65550860
 # ╠═21e36a09-4a5d-4c53-960c-4f26e0024e08
