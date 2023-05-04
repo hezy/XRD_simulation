@@ -7,6 +7,8 @@ using InteractiveUtils
 # ╔═╡ 512a1f38-e918-11ed-1743-1bcb626370a7
 begin
 	using Plots
+	using PlotThemes
+	theme(:dark::Symbol)
 	using Random
 	using Distributions
 	using DataFrames
@@ -103,15 +105,16 @@ function Miller_indices(cell_type::String, min::Int64, max::Int64)
 end
 
 # ╔═╡ 82de1d6e-3f55-4172-8e4c-c858d366547e
-function background(θ::Vector{Float64})
-    """background function for the XRD pattern """
-    return @. 2 + θ * (360 - θ) / 15000
+function add_background!(θ::Vector{Float64}, y::Vector{Float64})
+    """Add background function for the XRD pattern """
+    return y + @. 2 + θ * (360 - θ) / 15000
 end
 
 # ╔═╡ 6581fd81-22e6-46b8-8f62-dc6a80a6249f
-function make_noisy(θ::Vector{Float64}, y::Vector{Float64})
-    """Adding some noise to the data """
-    return (background(θ) + y) .* rand(Normal(1, 0.1), size(θ))
+function make_noisy!(y::Vector{Float64}; seed::Int64=347)
+    """Adding noise to the XRD pattern """
+	Random.seed!(seed) # Setting the seed for random noise
+    return y .* rand(Normal(1, 0.1), size(y))
 end
 
 # ╔═╡ d2946b18-24e4-4df6-84b9-7cea6b0acbda
@@ -171,16 +174,15 @@ function do_it(file_name::String, lattice_type::String)
 
     indices = Miller_indices(lattice_type, -5, 5)
 
-    y = (background(θ) + 
-        intensity_vs_angle(θ, indices, λ, a, U, V, W)) .*
-        rand(Normal(1, 0.1), N)
+	y = intensity_vs_angle(θ, indices, λ, a, U, V, W)
 
+    y = make_noisy!(add_background!(θ, y), seed=1991)
+	
     return θ, y
 end
 
 # ╔═╡ 15a623a0-e974-43bf-a85d-1edee0730c88
 function build_frame(data_file_name::String)
-    Random.seed!(347) # Setting the seed for random noise
 
     θ₀::Vector{Float64} = do_it_zero(data_file_name)
     df::DataFrame = DataFrame(θ=θ₀, SC=θ₀, BCC=θ₀, FCC=θ₀)
@@ -199,9 +201,6 @@ function save_frame(data_file_name::String, output_file_name::String)
 	return XRD_frame
 end
 
-# ╔═╡ 01fd7809-0b92-4f9b-adac-90b88fe9213e
-global XRD_frame::DataFrame = save_frame("./data/XRD_data.txt", "./output/XRD_results.csv")
-
 # ╔═╡ b112de4a-605e-47c4-ad27-94397a8dc6bc
 function plot_XRD(XRD_frame, lattice_type)
 	plotly()
@@ -210,17 +209,28 @@ function plot_XRD(XRD_frame, lattice_type)
 	xlabel="2θ (deg)", ylabel="Intensity (arb.)")
 end
 
+# ╔═╡ 44e4a7f7-827b-432e-88c8-bef5e2b33131
+function save_plots(plots_tuple, lattice_types, base_path)
+	save_path = map(x -> joinpath(base_path, x), lattice_types)
+	map(savefig, plots_tuple, save_path)
+	text = "saved files: " * string(save_path)
+	return text
+end
+
+# ╔═╡ 473c1b02-80e7-467e-b481-52f44fa92417
+# Main
+
+# ╔═╡ 01fd7809-0b92-4f9b-adac-90b88fe9213e
+XRD_frame::DataFrame = save_frame("./data/XRD_data.txt", "./output/XRD_results.csv")
+
 # ╔═╡ 04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
 lattice_types::Tuple = ("SC", "BCC", "FCC")
 
 # ╔═╡ 69bc65a1-fd98-48a4-92fd-d0ee4ad8e5bb
 plots = map(x -> plot_XRD(XRD_frame, x), lattice_types)
 
-# ╔═╡ 1330a23a-50d0-472d-99ea-46313431ec01
-save_path = map(x -> joinpath("output", x), lattice_types)
-
-# ╔═╡ 8c2a34dc-88fb-4adc-8d26-c6761c6d16b6
-map(savefig, plots, save_path)
+# ╔═╡ e92bc554-9ecc-4da0-8a48-283a274af9a9
+save_plots(plots, lattice_types, "output")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -228,6 +238,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+PlotThemes = "ccf2f8ad-2431-5c83-bf29-c5338b663b6a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
@@ -235,6 +246,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 CSV = "~0.10.9"
 DataFrames = "~1.5.0"
 Distributions = "~0.25.88"
+PlotThemes = "~3.1.0"
 Plots = "~1.38.11"
 """
 
@@ -244,7 +256,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "4e80ccc35b1d773cbab4f33dad932891c0442fa6"
+project_hash = "48edb72f8588dab98be42cea77548f69f37a9219"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -1352,11 +1364,12 @@ version = "1.4.1+0"
 # ╠═72765728-178a-46d3-9c52-a13b1e4bac07
 # ╠═15a623a0-e974-43bf-a85d-1edee0730c88
 # ╠═6360b359-c6ac-443f-8a6f-9ba975e27714
-# ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
 # ╠═b112de4a-605e-47c4-ad27-94397a8dc6bc
+# ╠═44e4a7f7-827b-432e-88c8-bef5e2b33131
+# ╠═473c1b02-80e7-467e-b481-52f44fa92417
+# ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
 # ╠═04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
 # ╠═69bc65a1-fd98-48a4-92fd-d0ee4ad8e5bb
-# ╠═1330a23a-50d0-472d-99ea-46313431ec01
-# ╠═8c2a34dc-88fb-4adc-8d26-c6761c6d16b6
+# ╠═e92bc554-9ecc-4da0-8a48-283a274af9a9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

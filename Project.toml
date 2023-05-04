@@ -2,6 +2,7 @@ name = "XRD_simulation"
 uuid = "2a64e3fa-717b-4c7b-90e3-35cbac58878c"
 authors = ["Hezy Amiel <hezy.amiel@gmail.com>"]
 version = "1.0.0"
+
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
