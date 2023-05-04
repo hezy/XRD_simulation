@@ -210,14 +210,17 @@ function plot_XRD(XRD_frame, lattice_type)
 	xlabel="2θ (deg)", ylabel="Intensity (arb.)")
 end
 
-# ╔═╡ 97cb9c6b-842a-4ec2-a93b-603d6a14cf7d
-p1 = plot_XRD(XRD_frame, "SC")
+# ╔═╡ 04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
+lattice_types::Tuple = ("SC", "BCC", "FCC")
 
-# ╔═╡ 58d62585-d13a-4a3f-bbc0-8b5c65550860
-p2 = plot_XRD(XRD_frame, "BCC")
+# ╔═╡ 69bc65a1-fd98-48a4-92fd-d0ee4ad8e5bb
+plots = map(x -> plot_XRD(XRD_frame, x), lattice_types)
 
-# ╔═╡ 21e36a09-4a5d-4c53-960c-4f26e0024e08
-p3 = plot_XRD(XRD_frame, "FCC")
+# ╔═╡ 1330a23a-50d0-472d-99ea-46313431ec01
+save_path = map(x -> joinpath("output", x), lattice_types)
+
+# ╔═╡ 8c2a34dc-88fb-4adc-8d26-c6761c6d16b6
+map(savefig, plots, save_path)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1351,8 +1354,9 @@ version = "1.4.1+0"
 # ╠═6360b359-c6ac-443f-8a6f-9ba975e27714
 # ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
 # ╠═b112de4a-605e-47c4-ad27-94397a8dc6bc
-# ╠═97cb9c6b-842a-4ec2-a93b-603d6a14cf7d
-# ╠═58d62585-d13a-4a3f-bbc0-8b5c65550860
-# ╠═21e36a09-4a5d-4c53-960c-4f26e0024e08
+# ╠═04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
+# ╠═69bc65a1-fd98-48a4-92fd-d0ee4ad8e5bb
+# ╠═1330a23a-50d0-472d-99ea-46313431ec01
+# ╠═8c2a34dc-88fb-4adc-8d26-c6761c6d16b6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
