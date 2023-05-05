@@ -8,12 +8,14 @@ using InteractiveUtils
 begin
 	using Plots
 	using PlotThemes
-	theme(:dark::Symbol)
 	using Random
 	using Distributions
 	using DataFrames
 	using CSV
 end
+
+# ╔═╡ 6b734786-0f48-4df9-841e-b4ed2379a2d2
+theme(:dark::Symbol)
 
 # ╔═╡ 00944f98-229e-4bf3-a0af-f82b1ce48ef8
 # Functions
@@ -195,14 +197,12 @@ function build_frame(data_file_name::String)
 end
 
 # ╔═╡ 6360b359-c6ac-443f-8a6f-9ba975e27714
-function save_frame(data_file_name::String, output_file_name::String)
-	XRD_frame = build_frame(data_file_name)
+function save_frame(XRD_frame, output_file_name::String)
 	CSV.write(output_file_name, XRD_frame)
-	return XRD_frame
 end
 
 # ╔═╡ b112de4a-605e-47c4-ad27-94397a8dc6bc
-function plot_XRD(XRD_frame, lattice_type)
+function build_plot(XRD_frame, lattice_type)
 	plotly()
     plot(XRD_frame[:, "θ"], XRD_frame[:, lattice_type],
 	title=("XRD - " * lattice_type),
@@ -221,13 +221,16 @@ end
 # Main
 
 # ╔═╡ 01fd7809-0b92-4f9b-adac-90b88fe9213e
-XRD_frame::DataFrame = save_frame("./data/XRD_data.txt", "./output/XRD_results.csv")
+XRD_frame::DataFrame = build_frame("./data/XRD_data.txt")
+
+# ╔═╡ d469ea6a-04ef-4f39-ab3c-5098261bba3d
+save_frame(XRD_frame, "./output/XRD_results.csv")
 
 # ╔═╡ 04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
 lattice_types::Tuple = ("SC", "BCC", "FCC")
 
 # ╔═╡ 69bc65a1-fd98-48a4-92fd-d0ee4ad8e5bb
-plots = map(x -> plot_XRD(XRD_frame, x), lattice_types)
+plots = map(x -> build_plot(XRD_frame, x), lattice_types)
 
 # ╔═╡ e92bc554-9ecc-4da0-8a48-283a274af9a9
 save_plots(plots, lattice_types, "output")
@@ -1349,6 +1352,7 @@ version = "1.4.1+0"
 
 # ╔═╡ Cell order:
 # ╠═512a1f38-e918-11ed-1743-1bcb626370a7
+# ╠═6b734786-0f48-4df9-841e-b4ed2379a2d2
 # ╠═00944f98-229e-4bf3-a0af-f82b1ce48ef8
 # ╠═2d4bd42f-4e68-418c-b1fd-4ed121e064c9
 # ╠═fc6c0ca7-5b19-4552-a7fe-d34ba52bd3bb
@@ -1368,6 +1372,7 @@ version = "1.4.1+0"
 # ╠═44e4a7f7-827b-432e-88c8-bef5e2b33131
 # ╠═473c1b02-80e7-467e-b481-52f44fa92417
 # ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
+# ╠═d469ea6a-04ef-4f39-ab3c-5098261bba3d
 # ╠═04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
 # ╠═69bc65a1-fd98-48a4-92fd-d0ee4ad8e5bb
 # ╠═e92bc554-9ecc-4da0-8a48-283a274af9a9
