@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.25
+# v0.17.5
 
 using Markdown
 using InteractiveUtils
@@ -7,15 +7,17 @@ using InteractiveUtils
 # ╔═╡ 512a1f38-e918-11ed-1743-1bcb626370a7
 begin
 	using Plots
-	using PlotThemes
 	using Random
 	using Distributions
 	using DataFrames
 	using CSV
 end
 
-# ╔═╡ 6b734786-0f48-4df9-841e-b4ed2379a2d2
-theme(:dark::Symbol)
+# ╔═╡ 7b5d9613-35d6-4b53-88c9-662866ca8882
+begin
+	using PlotThemes
+	theme(:dark::Symbol)
+end
 
 # ╔═╡ 00944f98-229e-4bf3-a0af-f82b1ce48ef8
 # Functions
@@ -153,7 +155,7 @@ function read_file(filename::String)
 end
 
 # ╔═╡ fa6e6d82-c036-43c1-af5e-a2b38b1cabf8
-function do_it_zero(file_name::String)
+function do_it(file_name::String)
     """colecting input data, building the XRD pattern with background and noise, plotting it """
     instrument_data, lattice_params = read_file(file_name)
 
@@ -186,7 +188,7 @@ end
 # ╔═╡ 15a623a0-e974-43bf-a85d-1edee0730c88
 function build_frame(data_file_name::String)
 
-    θ₀::Vector{Float64} = do_it_zero(data_file_name)
+    θ₀::Vector{Float64} = do_it(data_file_name)
     df::DataFrame = DataFrame(θ=θ₀, SC=θ₀, BCC=θ₀, FCC=θ₀)
     
     for lattice_type in ("SC", "BCC", "FCC")
@@ -202,11 +204,16 @@ function save_frame(XRD_frame, output_file_name::String)
 end
 
 # ╔═╡ b112de4a-605e-47c4-ad27-94397a8dc6bc
-function build_plot(XRD_frame, lattice_type)
+function build_plot(XRD_frame::DataFrame, lattice_type::String)
 	plotly()
     plot(XRD_frame[:, "θ"], XRD_frame[:, lattice_type],
 	title=("XRD - " * lattice_type),
 	xlabel="2θ (deg)", ylabel="Intensity (arb.)")
+end
+
+# ╔═╡ 0547d3d3-5903-40e0-9757-2c9dfcdd70c5
+function build_plot(XRD_frame::DataFrame, lattice_types::Tuple{String, String, String})
+	return map(x::String -> build_plot(XRD_frame, x), lattice_types)
 end
 
 # ╔═╡ 44e4a7f7-827b-432e-88c8-bef5e2b33131
@@ -229,8 +236,8 @@ save_frame(XRD_frame, "./output/XRD_results.csv")
 # ╔═╡ 04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
 lattice_types::Tuple = ("SC", "BCC", "FCC")
 
-# ╔═╡ 69bc65a1-fd98-48a4-92fd-d0ee4ad8e5bb
-plots = map(x -> build_plot(XRD_frame, x), lattice_types)
+# ╔═╡ 4e618903-e029-44fd-8a0c-b6abdd45a6a5
+plots = build_plot(XRD_frame, lattice_types)
 
 # ╔═╡ e92bc554-9ecc-4da0-8a48-283a274af9a9
 save_plots(plots, lattice_types, "output")
@@ -243,12 +250,11 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 PlotThemes = "ccf2f8ad-2431-5c83-bf29-c5338b663b6a"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 CSV = "~0.10.9"
 DataFrames = "~1.5.0"
-Distributions = "~0.25.88"
+Distributions = "~0.25.89"
 PlotThemes = "~3.1.0"
 Plots = "~1.38.11"
 """
@@ -259,7 +265,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "48edb72f8588dab98be42cea77548f69f37a9219"
+project_hash = "7fb34cd3adb88ca9eab517da765c55d045ac6d54"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -407,9 +413,9 @@ version = "0.4.0"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "180538ef4e3aa02b01413055a7a9e8b6047663e1"
+git-tree-sha1 = "c2614fa3aafe03d1a44b8e16508d9be718b8095a"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.88"
+version = "0.25.89"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -880,21 +886,21 @@ version = "1.4.2"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
-git-tree-sha1 = "2e47054ffe7d0a8872e977c0d09eb4b3d162ebde"
+git-tree-sha1 = "d0984cc886c48e5a165705ce65236dc2ec467b91"
 uuid = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
-version = "1.0.2"
+version = "1.1.0"
 
 [[deps.Preferences]]
 deps = ["TOML"]
-git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
+git-tree-sha1 = "7eb1686b4f04b82f96ed7a4ea5890a4f0c7a09f1"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
-version = "1.3.0"
+version = "1.4.0"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "Formatting", "LaTeXStrings", "Markdown", "Reexport", "StringManipulation", "Tables"]
-git-tree-sha1 = "548793c7859e28ef026dba514752275ee871169f"
+git-tree-sha1 = "213579618ec1f42dea7dd637a42785a608b1ea9c"
 uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "2.2.3"
+version = "2.2.4"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1352,7 +1358,7 @@ version = "1.4.1+0"
 
 # ╔═╡ Cell order:
 # ╠═512a1f38-e918-11ed-1743-1bcb626370a7
-# ╠═6b734786-0f48-4df9-841e-b4ed2379a2d2
+# ╠═7b5d9613-35d6-4b53-88c9-662866ca8882
 # ╠═00944f98-229e-4bf3-a0af-f82b1ce48ef8
 # ╠═2d4bd42f-4e68-418c-b1fd-4ed121e064c9
 # ╠═fc6c0ca7-5b19-4552-a7fe-d34ba52bd3bb
@@ -1369,12 +1375,13 @@ version = "1.4.1+0"
 # ╠═15a623a0-e974-43bf-a85d-1edee0730c88
 # ╠═6360b359-c6ac-443f-8a6f-9ba975e27714
 # ╠═b112de4a-605e-47c4-ad27-94397a8dc6bc
+# ╠═0547d3d3-5903-40e0-9757-2c9dfcdd70c5
 # ╠═44e4a7f7-827b-432e-88c8-bef5e2b33131
 # ╠═473c1b02-80e7-467e-b481-52f44fa92417
 # ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
 # ╠═d469ea6a-04ef-4f39-ab3c-5098261bba3d
 # ╠═04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
-# ╠═69bc65a1-fd98-48a4-92fd-d0ee4ad8e5bb
+# ╠═4e618903-e029-44fd-8a0c-b6abdd45a6a5
 # ╠═e92bc554-9ecc-4da0-8a48-283a274af9a9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
