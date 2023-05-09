@@ -216,8 +216,17 @@ function build_plot(XRD_frame::DataFrame, lattice_types::Tuple{String, String, S
 	return map(x::String -> build_plot(XRD_frame, x), lattice_types)
 end
 
+# ╔═╡ 7cecc396-4992-4bd5-a58c-455e07d2aab6
+function save_plot(plot, lattice_type, base_path)
+	#not tested yet
+	save_path = joinpath(base_path, lattice_type)
+	savefig(plot, save_path)
+	text = "saved file: " * string(save_path)
+	return text
+end
+
 # ╔═╡ 44e4a7f7-827b-432e-88c8-bef5e2b33131
-function save_plots(plots_tuple, lattice_types, base_path)
+function save_plots(plots_tuple::Tuple, lattice_types::Tuple, base_path::String)
 	save_path = map(x -> joinpath(base_path, x), lattice_types)
 	map(savefig, plots_tuple, save_path)
 	text = "saved files: " * string(save_path)
@@ -238,6 +247,12 @@ lattice_types::Tuple = ("SC", "BCC", "FCC")
 
 # ╔═╡ 4e618903-e029-44fd-8a0c-b6abdd45a6a5
 plots = build_plot(XRD_frame, lattice_types)
+
+# ╔═╡ 5bcf74e5-e085-4d05-b81f-cc6c16deebf4
+typeof(plots)
+
+# ╔═╡ 8344299f-3ee1-4921-b742-7812c9f30425
+
 
 # ╔═╡ e92bc554-9ecc-4da0-8a48-283a274af9a9
 save_plots(plots, lattice_types, "output")
@@ -1377,12 +1392,15 @@ version = "1.4.1+0"
 # ╠═6360b359-c6ac-443f-8a6f-9ba975e27714
 # ╠═b112de4a-605e-47c4-ad27-94397a8dc6bc
 # ╠═0547d3d3-5903-40e0-9757-2c9dfcdd70c5
+# ╠═7cecc396-4992-4bd5-a58c-455e07d2aab6
 # ╠═44e4a7f7-827b-432e-88c8-bef5e2b33131
 # ╠═473c1b02-80e7-467e-b481-52f44fa92417
 # ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
 # ╠═d469ea6a-04ef-4f39-ab3c-5098261bba3d
 # ╠═04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
 # ╠═4e618903-e029-44fd-8a0c-b6abdd45a6a5
+# ╠═5bcf74e5-e085-4d05-b81f-cc6c16deebf4
+# ╠═8344299f-3ee1-4921-b742-7812c9f30425
 # ╠═e92bc554-9ecc-4da0-8a48-283a274af9a9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
