@@ -154,15 +154,6 @@ function read_file(filename::String)
     return instrument_data, lattice_params
 end
 
-# ╔═╡ fa6e6d82-c036-43c1-af5e-a2b38b1cabf8
-function do_it(file_name::String)
-    """colecting input data, building the XRD pattern with background and noise, plotting it """
-    instrument_data, lattice_params = read_file(file_name)
-
-    θ = collect(LinRange(instrument_data["θ_min"], instrument_data["θ_max"], instrument_data["N"]))
-    return θ
-end
-
 # ╔═╡ 72765728-178a-46d3-9c52-a13b1e4bac07
 function do_it(file_name::String, lattice_type::String)
     """colecting input data, building the XRD pattern with background and noise, plotting it """
@@ -187,14 +178,11 @@ end
 
 # ╔═╡ 15a623a0-e974-43bf-a85d-1edee0730c88
 function build_frame(data_file_name::String)
-
-    θ₀::Vector{Float64} = do_it(data_file_name)
-    df::DataFrame = DataFrame(θ=θ₀, SC=θ₀, BCC=θ₀, FCC=θ₀)
-    
+"""  """
+	df::DataFrame = DataFrame([])
     for lattice_type in ("SC", "BCC", "FCC")
-        df[:, "θ"], df[:, lattice_type] = do_it(data_file_name, lattice_type)
+        df[:, "θ"], df[!, lattice_type] = do_it(data_file_name, lattice_type)
     end
-
 	return df
 end
 
@@ -250,9 +238,6 @@ plots = build_plot(XRD_frame, lattice_types)
 
 # ╔═╡ 5bcf74e5-e085-4d05-b81f-cc6c16deebf4
 typeof(plots)
-
-# ╔═╡ 8344299f-3ee1-4921-b742-7812c9f30425
-
 
 # ╔═╡ e92bc554-9ecc-4da0-8a48-283a274af9a9
 save_plots(plots, lattice_types, "output")
@@ -1386,7 +1371,6 @@ version = "1.4.1+0"
 # ╠═82de1d6e-3f55-4172-8e4c-c858d366547e
 # ╠═6581fd81-22e6-46b8-8f62-dc6a80a6249f
 # ╠═d2946b18-24e4-4df6-84b9-7cea6b0acbda
-# ╠═fa6e6d82-c036-43c1-af5e-a2b38b1cabf8
 # ╠═72765728-178a-46d3-9c52-a13b1e4bac07
 # ╠═15a623a0-e974-43bf-a85d-1edee0730c88
 # ╠═6360b359-c6ac-443f-8a6f-9ba975e27714
@@ -1400,7 +1384,6 @@ version = "1.4.1+0"
 # ╠═04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
 # ╠═4e618903-e029-44fd-8a0c-b6abdd45a6a5
 # ╠═5bcf74e5-e085-4d05-b81f-cc6c16deebf4
-# ╠═8344299f-3ee1-4921-b742-7812c9f30425
 # ╠═e92bc554-9ecc-4da0-8a48-283a274af9a9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
