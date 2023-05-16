@@ -6,7 +6,7 @@ using InteractiveUtils
 
 # ╔═╡ 512a1f38-e918-11ed-1743-1bcb626370a7
 begin
-	using Plots
+	using Plots; plotly()
 	using Random
 	using Distributions
 	using DataFrames
@@ -19,8 +19,11 @@ begin
 	theme(:dark::Symbol)
 end
 
-# ╔═╡ 00944f98-229e-4bf3-a0af-f82b1ce48ef8
-# Functions
+# ╔═╡ 7eca42cd-3ad5-4cce-9f2a-95875f46c78b
+md"""## Libraries """
+
+# ╔═╡ 00774bc2-4e99-4e14-a293-531e9495d990
+md"""## Functions"""
 
 # ╔═╡ 2d4bd42f-4e68-418c-b1fd-4ed121e064c9
 function pseudo_Voigt_peak(θ::Vector{Float64}, θ₀::Float64, A::Float64, w::Vector{Float64}, n::Float64)
@@ -181,7 +184,7 @@ function build_frame(data_file_name::String)
 """  """
 	df::DataFrame = DataFrame([])
     for lattice_type in ("SC", "BCC", "FCC")
-        df[:, "θ"], df[!, lattice_type] = do_it(data_file_name, lattice_type)
+        df.θ, df[!, lattice_type] = do_it(data_file_name, lattice_type)
     end
 	return df
 end
@@ -193,10 +196,13 @@ end
 
 # ╔═╡ b112de4a-605e-47c4-ad27-94397a8dc6bc
 function build_plot(XRD_frame::DataFrame, lattice_type::String)
-	plotly()
-    plot(XRD_frame[:, "θ"], XRD_frame[:, lattice_type],
-	title=("XRD - " * lattice_type),
-	xlabel="2θ (deg)", ylabel="Intensity (arb.)")
+    plot(
+		 XRD_frame.θ,
+		 XRD_frame[:, lattice_type],
+	     title=("XRD - " * lattice_type),
+	     xlabel="2θ (deg)",
+		 ylabel="Intensity (arb.)"
+		)
 end
 
 # ╔═╡ 0547d3d3-5903-40e0-9757-2c9dfcdd70c5
@@ -222,7 +228,7 @@ function save_plots(plots_tuple::Tuple, lattice_types::Tuple, base_path::String)
 end
 
 # ╔═╡ 473c1b02-80e7-467e-b481-52f44fa92417
-# Main
+md"""## Main"""
 
 # ╔═╡ 01fd7809-0b92-4f9b-adac-90b88fe9213e
 XRD_frame::DataFrame = build_frame("./data/XRD_data.txt")
@@ -1358,9 +1364,10 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
+# ╟─7eca42cd-3ad5-4cce-9f2a-95875f46c78b
 # ╠═512a1f38-e918-11ed-1743-1bcb626370a7
 # ╠═7b5d9613-35d6-4b53-88c9-662866ca8882
-# ╠═00944f98-229e-4bf3-a0af-f82b1ce48ef8
+# ╠═00774bc2-4e99-4e14-a293-531e9495d990
 # ╠═2d4bd42f-4e68-418c-b1fd-4ed121e064c9
 # ╠═fc6c0ca7-5b19-4552-a7fe-d34ba52bd3bb
 # ╠═526d1dc8-183a-4db2-9faf-a4cf70997dc1
@@ -1378,7 +1385,7 @@ version = "1.4.1+0"
 # ╠═0547d3d3-5903-40e0-9757-2c9dfcdd70c5
 # ╠═7cecc396-4992-4bd5-a58c-455e07d2aab6
 # ╠═44e4a7f7-827b-432e-88c8-bef5e2b33131
-# ╠═473c1b02-80e7-467e-b481-52f44fa92417
+# ╟─473c1b02-80e7-467e-b481-52f44fa92417
 # ╠═01fd7809-0b92-4f9b-adac-90b88fe9213e
 # ╠═d469ea6a-04ef-4f39-ab3c-5098261bba3d
 # ╠═04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
