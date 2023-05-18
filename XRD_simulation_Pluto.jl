@@ -6,17 +6,12 @@ using InteractiveUtils
 
 # ╔═╡ 512a1f38-e918-11ed-1743-1bcb626370a7
 begin
-	using Plots; plotly()
 	using Random
 	using Distributions
 	using DataFrames
 	using CSV
-end
-
-# ╔═╡ 7b5d9613-35d6-4b53-88c9-662866ca8882
-begin
-	using PlotThemes
-	theme(:dark::Symbol)
+	using Plots; plotly()
+	using PlotThemes; theme(:dark::Symbol)
 end
 
 # ╔═╡ 7eca42cd-3ad5-4cce-9f2a-95875f46c78b
@@ -26,21 +21,25 @@ md"""## Libraries """
 md"""## Functions"""
 
 # ╔═╡ 2d4bd42f-4e68-418c-b1fd-4ed121e064c9
-function pseudo_Voigt_peak(θ::Vector{Float64}, θ₀::Float64, A::Float64, w::Vector{Float64}, n::Float64)
+function pseudo_Voigt_peak(θ::Vector{Float64}, θ₀::Float64, A::Float64, w::Vector{Float64}, n::Float64=0.5)
     """Returns a pseudo Voigt peak centered around θ₀, with amplitude A, width w, and mixing factor n """
     """TODO: independent wₗ(θ) and w_g(θ) """
     γ = w / 2
     σ = w / (2√(2log(2)))
-    return @. A * (n * pdf.(Cauchy(θ₀, γ), θ) + (1-n) * pdf.(Normal(θ₀, σ), θ))
+    return @. A * (n * pdf.(Cauchy(θ₀, γ), θ) +
+				   (1-n) * pdf.(Normal(θ₀, σ), θ))
     # equivalent to:
-    # return @. A * (n* (γ / pi) / ((θ - θ₀)^2 + γ^2) + (1 - n) * 1 / √(2π) / σ * exp(-(θ - θ₀)^2 / 2σ^2)
+    # return @. A * (n* (γ / pi) / ((θ - θ₀)^2 + γ^2)) + 
+	# 			  (1 - n) * 1 / √(2π) / σ * exp(-(θ - θ₀)^2 / 2σ^2)
 end
 
 # ╔═╡ fc6c0ca7-5b19-4552-a7fe-d34ba52bd3bb
 function peaks_width(two_θ_deg::Vector{Float64}, U::Float64, V::Float64, W::Float64)
     """Returns the width of a peak as afunction of 2θ with U, V, W parameters"""
     two_θ_rad = two_θ_deg * π / 180
-    return @. √(U * tan(two_θ_rad / 2)^2 + V * tan(two_θ_rad / 2) + W)
+    return @. √(U * tan(two_θ_rad / 2)^2 +
+				V * tan(two_θ_rad / 2) +
+				W)
 end
 
 # ╔═╡ 526d1dc8-183a-4db2-9faf-a4cf70997dc1
@@ -92,21 +91,23 @@ function Miller_indices(cell_type::String, min::Int64, max::Int64)
     if cell_type == "SC"
         # In simple cubic lattice, all Miller indices are allowed
         return [
-            [h, k, l] for h = min:max for k = min:max for
-            l = min:max if [h, k, l] != [0, 0, 0]
+            [h, k, l] for h = min:max for k = min:max for l = min:max
+			if [h, k, l] != [0, 0, 0]
         ]
     elseif cell_type == "BCC"
         # In body centered cubic lattice, only indices with h+k+l=even are allowed
         return [
-            [h, k, l] for h = min:max for k = min:max for
-            l = min:max if iseven(h + k + l) && [h, k, l] != [0, 0, 0]
+            [h, k, l] for h = min:max for k = min:max for l = min:max
+			if iseven(h + k + l)
+			   && [h, k, l] != [0, 0, 0]
         ]
     elseif cell_type == "FCC"
         # In face centered cubic lattice, h,k,l must all be either odd or even
         return [
-            [h, k, l] for h = min:max for k = min:max for l = min:max if
-            ((iseven(h) && iseven(k) && iseven(l)) || (isodd(h) && isodd(k) && isodd(l))) &&
-            [h, k, l] != [0, 0, 0]
+            [h, k, l] for h = min:max for k = min:max for l = min:max
+			if ((iseven(h) && iseven(k) && iseven(l)) ||
+				(isodd(h) && isodd(k) && isodd(l)))
+				&& [h, k, l] != [0, 0, 0]
         ]
     end
 end
@@ -160,23 +161,31 @@ end
 # ╔═╡ 72765728-178a-46d3-9c52-a13b1e4bac07
 function do_it(file_name::String, lattice_type::String)
     """colecting input data, building the XRD pattern with background and noise, plotting it """
-    instrument_data::Dict{AbstractString, Any}, lattice_params::Dict{AbstractString, Float64} = read_file(file_name)
+    instrument_data::Dict{AbstractString, Any},
+	lattice_params::Dict{AbstractString, Float64} = read_file(file_name)
 
-    N = instrument_data["N"]::Int64
-    θ = collect(LinRange(instrument_data["θ_min"], instrument_data["θ_max"], instrument_data["N"]))::Vector{Float64}
-    y = zeros(instrument_data["N"])::Vector{Float64}
-    λ = instrument_data["λ"]::Float64
-    U, V, W = instrument_data["U"]::Float64, instrument_data["V"]::Float64, instrument_data["W"]::Float64
+    N::Int64 = instrument_data["N"]
     
-    a = lattice_params[lattice_type]::Float64
+	θ::Vector{Float64} = collect(LinRange(instrument_data["θ_min"],
+						 instrument_data["θ_max"],
+						 instrument_data["N"]))
+    
+	y::Vector{Float64} = zeros(instrument_data["N"])
+ 
+	λ::Float64 = instrument_data["λ"]
+ 
+	U::Float64, V::Float64, W::Float64 =
+		instrument_data["U"], instrument_data["V"], instrument_data["W"]
+    
+    a::Float64 = lattice_params[lattice_type]
 
-    indices = Miller_indices(lattice_type, -5, 5)
+    indices::Vector{Vector{Int64}} = Miller_indices(lattice_type, -5, 5)
 
-	y = intensity_vs_angle(θ, indices, λ, a, U, V, W)
-
-    y = make_noisy!(add_background!(θ, y), seed=1991)
+	y_clean::Vector{Float64} = intensity_vs_angle(θ, indices, λ, a, U, V, W)
 	
-    return θ, y
+    y_noisy::Vector{Float64} = make_noisy!(add_background!(θ, y_clean), seed=1991)
+	
+    return θ, y_noisy
 end
 
 # ╔═╡ 15a623a0-e974-43bf-a85d-1edee0730c88
@@ -198,10 +207,11 @@ end
 function build_plot(XRD_frame::DataFrame, lattice_type::String)
     plot(
 		 XRD_frame.θ,
-		 XRD_frame[:, lattice_type],
+		 XRD_frame[:, lattice_type];
 	     title=("XRD - " * lattice_type),
 	     xlabel="2θ (deg)",
-		 ylabel="Intensity (arb.)"
+		 ylabel="Intensity (arb.)",
+		 legend=false
 		)
 end
 
@@ -211,7 +221,7 @@ function build_plot(XRD_frame::DataFrame, lattice_types::Tuple{String, String, S
 end
 
 # ╔═╡ 7cecc396-4992-4bd5-a58c-455e07d2aab6
-function save_plot(plot, lattice_type, base_path)
+function save_plot(plot, lattice_type::String, base_path::String)
 	#not tested yet
 	save_path = joinpath(base_path, lattice_type)
 	savefig(plot, save_path)
@@ -241,9 +251,6 @@ lattice_types::Tuple = ("SC", "BCC", "FCC")
 
 # ╔═╡ 4e618903-e029-44fd-8a0c-b6abdd45a6a5
 plots = build_plot(XRD_frame, lattice_types)
-
-# ╔═╡ 5bcf74e5-e085-4d05-b81f-cc6c16deebf4
-typeof(plots)
 
 # ╔═╡ e92bc554-9ecc-4da0-8a48-283a274af9a9
 save_plots(plots, lattice_types, "output")
@@ -1366,8 +1373,7 @@ version = "1.4.1+0"
 # ╔═╡ Cell order:
 # ╟─7eca42cd-3ad5-4cce-9f2a-95875f46c78b
 # ╠═512a1f38-e918-11ed-1743-1bcb626370a7
-# ╠═7b5d9613-35d6-4b53-88c9-662866ca8882
-# ╠═00774bc2-4e99-4e14-a293-531e9495d990
+# ╟─00774bc2-4e99-4e14-a293-531e9495d990
 # ╠═2d4bd42f-4e68-418c-b1fd-4ed121e064c9
 # ╠═fc6c0ca7-5b19-4552-a7fe-d34ba52bd3bb
 # ╠═526d1dc8-183a-4db2-9faf-a4cf70997dc1
@@ -1390,7 +1396,6 @@ version = "1.4.1+0"
 # ╠═d469ea6a-04ef-4f39-ab3c-5098261bba3d
 # ╠═04ae64eb-8cd8-4033-9f7a-f35bfc9cdc15
 # ╠═4e618903-e029-44fd-8a0c-b6abdd45a6a5
-# ╠═5bcf74e5-e085-4d05-b81f-cc6c16deebf4
 # ╠═e92bc554-9ecc-4da0-8a48-283a274af9a9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
