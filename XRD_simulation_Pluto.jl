@@ -160,7 +160,9 @@ end
 
 # ╔═╡ 72765728-178a-46d3-9c52-a13b1e4bac07
 function do_it(file_name::String, lattice_type::String)
-    """colecting input data, building the XRD pattern with background and noise, plotting it """
+"""
+colecting input data, building the XRD pattern with background and noise 
+"""
     instrument_data::Dict{AbstractString, Any},
 	lattice_params::Dict{AbstractString, Float64} = read_file(file_name)
 
