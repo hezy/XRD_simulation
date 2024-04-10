@@ -1,12 +1,6 @@
 # Libraries
-begin
-	using Random
-	using Distributions
-	using DataFrames
-	using CSV
-	using Plots; plotly()
-	using PlotThemes; theme(:dark::Symbol)
-end
+using Random, Distributions, DataFrames, CSV, Plots; plotly()
+#using PlotThemes; theme(:dark::Symbol)
 
 
 # Functions
@@ -228,6 +222,12 @@ function save_plots(plots_tuple::Tuple, lattice_types::Tuple, base_path::String)
 end
 
 
+function display_plots(plots::Tuple)
+    for i in 1:length(plots) 
+        display(plots[i])
+    end
+end
+
 # Main
 
 XRD_frame::DataFrame = build_frame("./data/XRD_data.txt")
@@ -239,3 +239,5 @@ lattice_types::Tuple = ("SC", "BCC", "FCC")
 plots = build_plot(XRD_frame, lattice_types)
 
 save_plots(plots, lattice_types, "output")
+
+display_plots(plots)
