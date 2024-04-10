@@ -1,9 +1,9 @@
-# Libraries
+# Loading Libraries
 using Random, Distributions, DataFrames, CSV, Plots; plotly()
 #using PlotThemes; theme(:dark::Symbol)
 
 
-# Functions
+# Functions definition
 
 function pseudo_Voigt_peak(θ::Vector{Float64}, θ₀::Float64, A::Float64, w::Vector{Float64}, n::Float64=0.5)
     """Returns a pseudo Voigt peak centered around θ₀, with amplitude A, width w, and mixing factor n """
@@ -228,7 +228,8 @@ function display_plots(plots::Tuple)
     end
 end
 
-# Main
+
+# Main program
 
 XRD_frame::DataFrame = build_frame("./data/XRD_data.txt")
 
