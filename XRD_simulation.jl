@@ -191,12 +191,15 @@ end
 
 
 function build_plot(XRD_frame::DataFrame, lattice_type::String)
-    plot(XRD_frame.θ,
-		 XRD_frame[:, lattice_type];
-	     title=("XRD - " * lattice_type),
-	     xlabel="2θ (deg)",
-		 ylabel="Intensity (arb.)",
-		 legend=false)
+"""plotting"""
+    plot(
+        XRD_frame.θ,
+        XRD_frame[:, lattice_type];
+	    title=("XRD - " * lattice_type),
+	    xlabel="2θ (deg)",
+		ylabel="Intensity (arb.)",
+		legend=false
+        )
 end
 
 
