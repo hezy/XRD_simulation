@@ -1,5 +1,6 @@
 # Loading Libraries
-using Random, Distributions, DataFrames, CSV, Plots; plotly()
+using Random, Distributions, DataFrames, CSV, Plots;
+plotly();
 #using PlotThemes; theme(:dark::Symbol)
 
 
@@ -11,10 +12,10 @@ function pseudo_Voigt_peak(θ::Vector{Float64}, θ₀::Float64, A::Float64, w::V
     γ = w / 2
     σ = w / (2√(2log(2)))
     return @. A * (n * pdf.(Cauchy(θ₀, γ), θ) +
-				   (1-n) * pdf.(Normal(θ₀, σ), θ))
+                   (1 - n) * pdf.(Normal(θ₀, σ), θ))
     # equivalent to:
     # return @. A * (n* (γ / pi) / ((θ - θ₀)^2 + γ^2)) + 
-	# 			  (1 - n) * 1 / √(2π) / σ * exp(-(θ - θ₀)^2 / 2σ^2)
+    # 			  (1 - n) * 1 / √(2π) / σ * exp(-(θ - θ₀)^2 / 2σ^2)
 end
 
 
@@ -22,8 +23,8 @@ function peaks_width(two_θ_deg::Vector{Float64}, U::Float64, V::Float64, W::Flo
     """Returns the width of a peak as afunction of 2θ with U, V, W parameters"""
     two_θ_rad = two_θ_deg * π / 180
     return @. √(U * tan(two_θ_rad / 2)^2 +
-				V * tan(two_θ_rad / 2) +
-				W)
+                V * tan(two_θ_rad / 2) +
+                W)
 end
 
 
@@ -37,7 +38,7 @@ end
 
 function d_list(indices::Matrix{Int64}, a::Float64)
     """Returnes the inter-layers distances as a function of Miller_indices """
-    return a ./ .√(sum(indices .^ 2, dims = 2))
+    return a ./ .√(sum(indices .^ 2, dims=2))
 end
 
 
@@ -71,27 +72,29 @@ function Miller_indices(cell_type::String, min::Int64, max::Int64)
     if !(isa(min, Int) && isa(max, Int))
         error("Minimum and maximum values must be integers.")
     end
-    
+
     if cell_type == "SC"
         # In simple cubic lattice, all Miller indices are allowed
         return [
             [h, k, l] for h = min:max for k = min:max for l = min:max
-			if [h, k, l] != [0, 0, 0]
+            if [h, k, l] != [0, 0, 0]
         ]
     elseif cell_type == "BCC"
         # In body centered cubic lattice, only indices with h+k+l=even are allowed
         return [
             [h, k, l] for h = min:max for k = min:max for l = min:max
-			if iseven(h + k + l)
-			   && [h, k, l] != [0, 0, 0]
+            if iseven(h + k + l)
+            &&
+            [h, k, l] != [0, 0, 0]
         ]
     elseif cell_type == "FCC"
         # In face centered cubic lattice, h,k,l must all be either odd or even
         return [
             [h, k, l] for h = min:max for k = min:max for l = min:max
-			if ((iseven(h) && iseven(k) && iseven(l)) ||
-				(isodd(h) && isodd(k) && isodd(l)))
-				&& [h, k, l] != [0, 0, 0]
+            if ((iseven(h) && iseven(k) && iseven(l)) ||
+             (isodd(h) && isodd(k) && isodd(l)))
+            &&
+            [h, k, l] != [0, 0, 0]
         ]
     end
 end
@@ -105,7 +108,7 @@ end
 
 function make_noisy!(y::Vector{Float64}; seed::Int64=347)
     """Adding noise to the XRD pattern """
-	Random.seed!(seed) # Setting the seed for random noise
+    Random.seed!(seed) # Setting the seed for random noise
     return y .* rand(Normal(1, 0.1), size(y))
 end
 
@@ -144,90 +147,90 @@ end
 
 
 function do_it(file_name::String, lattice_type::String)
-"""
-colecting input data, building the XRD pattern with background and noise 
-"""
-    instrument_data::Dict{AbstractString, Any},
-	lattice_params::Dict{AbstractString, Float64} = read_file(file_name)
+    """
+    colecting input data, building the XRD pattern with background and noise 
+    """
+    instrument_data::Dict{AbstractString,Any},
+    lattice_params::Dict{AbstractString,Float64} = read_file(file_name)
 
     N::Int64 = instrument_data["N"]
-    
-	θ::Vector{Float64} = collect(LinRange(instrument_data["θ_min"],
-						 instrument_data["θ_max"],
-						 instrument_data["N"]))
-    
-	y::Vector{Float64} = zeros(instrument_data["N"])
- 
-	λ::Float64 = instrument_data["λ"]
- 
-	U::Float64, V::Float64, W::Float64 =
-		instrument_data["U"], instrument_data["V"], instrument_data["W"]
-    
+
+    θ::Vector{Float64} = collect(LinRange(instrument_data["θ_min"],
+        instrument_data["θ_max"],
+        instrument_data["N"]))
+
+    y::Vector{Float64} = zeros(instrument_data["N"])
+
+    λ::Float64 = instrument_data["λ"]
+
+    U::Float64, V::Float64, W::Float64 =
+        instrument_data["U"], instrument_data["V"], instrument_data["W"]
+
     a::Float64 = lattice_params[lattice_type]
 
     indices::Vector{Vector{Int64}} = Miller_indices(lattice_type, -5, 5)
 
-	y_clean::Vector{Float64} = intensity_vs_angle(θ, indices, λ, a, U, V, W)
-	
+    y_clean::Vector{Float64} = intensity_vs_angle(θ, indices, λ, a, U, V, W)
+
     y_noisy::Vector{Float64} = make_noisy!(add_background!(θ, y_clean), seed=1991)
-	
+
     return θ, y_noisy
 end
 
 
 function build_frame(data_file_name::String)
-"""  """
-	df::DataFrame = DataFrame([])
+    """  """
+    df::DataFrame = DataFrame([])
     for lattice_type in ("SC", "BCC", "FCC")
         df.θ, df[!, lattice_type] = do_it(data_file_name, lattice_type)
     end
-	return df
+    return df
 end
 
 
 function save_frame(XRD_frame, output_file_name::String)
-	CSV.write(output_file_name, XRD_frame)
+    CSV.write(output_file_name, XRD_frame)
 end
 
 
 function build_plot(XRD_frame::DataFrame, lattice_type::String)
-"""plotting"""
+    """plotting"""
     p = plot(
-            XRD_frame.θ,
-            XRD_frame[:, lattice_type];
-	        title=("XRD - " * lattice_type),
-	        xlabel="2θ (deg)",
-		    ylabel="Intensity (arb.)",
-		    legend=false
-        )
+        :XRD_frame.θ,
+        XRD_frame[:, lattice_type];
+        title=("XRD - " * lattice_type),
+        xlabel="2θ (deg)",
+        ylabel="Intensity (arb.)",
+        legend=false
+    )
     return p
 end
 
 
-function build_plot(XRD_frame::DataFrame, lattice_types::Tuple{String, String, String})
-	return map(x::String -> build_plot(XRD_frame, x), lattice_types)
+function build_plot(XRD_frame::DataFrame, lattice_types::Tuple{String,String,String})
+    return map(x::String -> build_plot(XRD_frame, x), lattice_types)
 end
 
 
 function save_plot(plot, lattice_type::String, base_path::String)
-	#not tested yet
-	save_path = joinpath(base_path, lattice_type)
-	savefig(plot, save_path)
-	text = "saved file: " * string(save_path)
-	return text
+    #not tested yet
+    save_path = joinpath(base_path, lattice_type)
+    savefig(plot, save_path)
+    text = "saved file: " * string(save_path)
+    return text
 end
 
 
 function save_plots(plots_tuple::Tuple, lattice_types::Tuple, base_path::String)
-	save_path = map(x -> joinpath(base_path, x), lattice_types)
-	map(savefig, plots_tuple, save_path)
-	text = "saved files: " * string(save_path)
-	return text
+    save_path = map(x -> joinpath(base_path, x), lattice_types)
+    map(savefig, plots_tuple, save_path)
+    text = "saved files: " * string(save_path)
+    return text
 end
 
 
 function display_plots(plots::Tuple)
-    for i in 1:length(plots) 
+    for i in 1:length(plots)
         display(plots[i])
     end
 end
